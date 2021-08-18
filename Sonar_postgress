@@ -1,0 +1,66 @@
+1  apt-get update
+    2  apt-get install docker.io
+    3  sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+    4  sudo chmod +x /usr/local/bin/docker-compose
+    5  docker-compose --version
+    6  ls
+    7  mkdir sonar
+    8  ls
+    9  cd sonar
+   10  ls
+   11  nano docker-compose.yml
+   12  ls
+   13  cat docker-compose.yml
+   14  clear
+   15  docker-compose up
+   16  sysctl -w fs.file-max=131072
+   17  ulimit -n 131072
+   18  ulimit -u 8192
+   19  docker-compose up
+
+ before compose up 
+ sysctl -w vm.max_map_count=524288
+sysctl -w fs.file-max=131072
+ulimit -n 131072
+ulimit -u 8192
+
+
+Docker-ompose file :
+version: "3.3"
+services:
+  db:
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sonarqube-net
+
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      - db
+    environment:
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.url=jdbc:postgresql://db/sonar
+      - sonar.jdbc.password=sonar
+    ports:
+      - 9000:9000
+    volumes:
+      - sonar_conf:/opt/sonarqube/conf
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+      - sonar_plugins:/opt/sonarqube/lib/bundled-plugins
+    networks:
+      - sonarqube-net
+networks:
+  sonarqube-net:
+volumes:
+  sonar_conf:
+  sonar_data:
+  sonar_extensions:
+  sonar_plugins:
+  postgres_data:
